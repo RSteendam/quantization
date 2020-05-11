@@ -1,7 +1,10 @@
-pip install --user kaggle
-export PATH="~$HOME/.local/bin:$PATH"
+pip3 install --user kaggle
+export PATH="~/.local/bin:$PATH"
 mkdir .kaggle
-mv kaggle.json .kaggle/
+mv quantization/utils/kaggle.json .kaggle/
+chmod 600 .kaggle/kaggle.json
+mkdir data
+cd data
 kaggle competitions download -c dogs-vs-cats
 unzip dogs-vs-cats.zip
 unzip train.zip

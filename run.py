@@ -19,16 +19,27 @@ from tensorflow.keras.layers import Dense, GlobalAveragePooling2D, Flatten
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.models import Model
 
+import tensorflow.keras.backend as K
 INPUT_SHAPE = (224, 224, 3)
 
 def main(args):
+    print('DEBUG INFO')
+    print('TF Version: {}'.format(tf.__version__))
+    if tf.__version__ != "2.1.0":
+        raise ValueError("TensorFlow version should be 2.1.0")
+    if tf.test.gpu_device_name():
+        print('Default GPU Device: {}'.format(tf.test.gpu_device_name()))
+    else:
+        raise ValueError("Please install GPU version of TF")
+
+    set_precision(args.precision)
+
+    print('---')
     print('STARTING TRAINING AND VALIDATION')
     print('model: {}, batch size: {}, epochs: {}'.format(args.model, args.batch_size, args.epochs))
     print('precision: {}'.format(args.precision))
-    
+
     print('---')
-    set_precision(args.precision)
-    
     print('Splitting data...')
     split_data(20000, 5000)
     
@@ -57,11 +68,15 @@ def set_precision(precision):
         K.set_epsilon(1e-4)
     elif precision == 'mixed':
         policy = mixed_precision.Policy('mixed_float16')
-        mixed_precision.set_policy(policy)
+    else:
+        policy = mixed_precision.Policy('float32')
+    mixed_precision.set_policy(policy)
+    print('Compute dtype: %s' % policy.compute_dtype)
+    print('Variable dtype: %s' % policy.variable_dtype)
 
 
 def split_data(train_size, val_size):
-  files = glob.glob('train/*')
+  files = glob.glob('data/train/*')
 
   train_files = np.random.choice(files, size=train_size, replace=False)
   cat_train = [fn for fn in train_files if 'cat' in fn]
