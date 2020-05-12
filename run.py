@@ -68,11 +68,14 @@ def set_precision(precision):
         K.set_epsilon(1e-4)
     elif precision == 'mixed':
         policy = mixed_precision.Policy('mixed_float16')
+        mixed_precision.set_policy(policy)
+        print('Compute dtype: %s' % policy.compute_dtype)
+        print('Variable dtype: %s' % policy.variable_dtype)
     else:
         policy = mixed_precision.Policy('float32')
-    mixed_precision.set_policy(policy)
-    print('Compute dtype: %s' % policy.compute_dtype)
-    print('Variable dtype: %s' % policy.variable_dtype)
+        mixed_precision.set_policy(policy)
+        print('Compute dtype: %s' % policy.compute_dtype)
+        print('Variable dtype: %s' % policy.variable_dtype)
 
 
 def split_data(train_size, val_size):
@@ -133,8 +136,9 @@ def build_model(base_model, learn_rate=0.0001):
     for layer in base_model.layers:
       layer.trainable = False
     x = base_model.output
-    x=Flatten()(x)
-    x=Dense(128,activation='relu')(x)
+    print('GAPooling')
+    x=GlobalAveragePooling2D()(x)
+    x=Dense(1024,activation='relu')(x)
     preds=Dense(1,activation='sigmoid')(x)
     model = Model(inputs=base_model.input,outputs=preds)
 
@@ -164,8 +168,12 @@ if __name__ == "__main__":
         type=int, default=8)
 
     parser.add_argument('--model',
-    help='Specify model type, vgg, inception or resnet, default is inception',
-    type=str, choices=['vgg', 'resnet', 'inception'], default='inception')
+        help='Specify model type, vgg, inception or resnet, default is inception',
+        type=str, choices=['vgg', 'resnet', 'inception'], default='inception')
+
+    parser.add_argument('--run',
+        help='Specify type of run, train or test, default is train',
+        type=str, choices=['train, test'], default='train')
 
     args = parser.parse_args()
     main(args)
