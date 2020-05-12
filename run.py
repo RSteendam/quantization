@@ -48,22 +48,23 @@ def main(args):
     print('Building generators...')
     train_generator, validation_generator, test_generator = build_generators(args.batch_size)
 
-    print('Building model{}...'.format(args.model))
-
-    # weights=None, classes=None
-    if args.model == 'vgg':
-        base_model = vgg16.VGG16(include_top=False, input_shape=INPUT_SHAPE)
-    elif args.model == 'inception':
-        base_model = inception_v3.InceptionV3(include_top=False, input_shape=INPUT_SHAPE)
-    elif args.model == 'resnet':
-        base_model = resnet_v2.ResNet152V2(include_top=False, input_shape=INPUT_SHAPE)
-    model = build_model(base_model)
-
     if os.path.exists('float32') and os.path.exists('mixed'):
         print('loading pre-trained models')
         model_float32 = load_model('float32')
         model_mixed = load_model('mixed')
     else:
+        print('Building model{}...'.format(args.model))
+
+        # weights=None, classes=None
+        if args.model == 'vgg':
+            base_model = vgg16.VGG16(include_top=False, input_shape=INPUT_SHAPE)
+        elif args.model == 'inception':
+            base_model = inception_v3.InceptionV3(include_top=False, input_shape=INPUT_SHAPE)
+        elif args.model == 'resnet':
+            base_model = resnet_v2.ResNet152V2(include_top=False, input_shape=INPUT_SHAPE)
+        model = build_model(base_model)
+
+
         print('Training model {}...'.format(args.model))
         set_precision('float32')
         model_float32 = train(model, train_generator, validation_generator, args.epochs)
@@ -74,6 +75,7 @@ def main(args):
         model_mixed = train(model, train_generator, validation_generator, args.epochs)
         print('saving model mixed')
         model.save('mixed')
+
     mcnemar(model_float32, model_mixed, test_generator)
 
     if False:
@@ -180,15 +182,18 @@ def train(model, train_generator, validation_generator, epochs):
     return model
 
 def mcnemar(model1, model2, test_generator):
-    print("'running McNemar's Test'")
+    print("running McNemar's Test")
     yesyes = 0
     yesno = 0
     noyes = 0
     nono = 0
     total = len(test_generator)
     print('{} items to evaluate'.format(total))
-    count = 0
-    for item in test_generator:
+    index = 0
+    while index <= test_generator.batch_index:
+
+        item = test_generator.next()
+
         model1_results = model1.evaluate(item[0], item[1], verbose=0)[1]
         model2_results = model2.evaluate(item[0], item[1], verbose=0)[1]
         if model1_results == 1:
@@ -207,10 +212,15 @@ def mcnemar(model1, model2, test_generator):
                 print('unknown scenario model1: {}, model2: {}'.format(model1_results, model2_results))
         else:
             print('unknown scenario model1: {}, model2: {}'.format(model1_results, model2_results))
-        count += 1
-        if count % 100 == 0:
-            print('{} / {} done. yes/yes: {}, yes/no: {}, no/yes: {}, no/no: {}'.format(count, total, yesyes, yesno, noyes, nono))
 
+        index += 1
+        if index % 500 == 0:
+            percentage = int(index / total * 100)
+            print('{}% done. yes/yes: {}, yes/no: {}, no/yes: {}, no/no: {}'.format(percentage, yesyes, yesno,
+                                                                                    noyes, nono))
+        elif index % 100 == 0:
+            percentage = int(index / total * 100)
+            print('{}% done.'.format(percentage))
 
     print('yes/yes: {}, yes/no: {}, no/yes: {}, no/no: {}'.format(yesyes, yesno, noyes, nono))
 
