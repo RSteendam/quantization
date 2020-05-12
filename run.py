@@ -58,6 +58,12 @@ def main(args):
     
     print('Training model {}...'.format(args.model))
     train(model, train_generator, validation_generator, args.epochs)
+    if False:
+        print('running precision')
+        trained_model.predict(x=validation_generator, workers=4, verbose=1)
+
+        print('running precision 2')
+        trained_model.predict(x=validation_generator, workers=4, verbose=1)
 
 
 def set_precision(precision):
@@ -136,7 +142,6 @@ def build_model(base_model, learn_rate=0.0001):
     for layer in base_model.layers:
       layer.trainable = False
     x = base_model.output
-    print('GAPooling')
     x=GlobalAveragePooling2D()(x)
     x=Dense(1024,activation='relu')(x)
     preds=Dense(1,activation='sigmoid')(x)
@@ -148,7 +153,7 @@ def build_model(base_model, learn_rate=0.0001):
 
 
 def train(model, train_generator, validation_generator, epochs):
-    model.fit(train_generator, epochs=epochs, validation_data=validation_generator)   
+    model.fit(train_generator, epochs=epochs, validation_data=validation_generator, workers=4)
 
     return model
 
