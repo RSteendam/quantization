@@ -173,3 +173,75 @@ Epoch 7/8
 313/313 [==============================] - 44s 141ms/step - loss: 0.1844 - accuracy: 0.9254 - val_loss: 0.2163 - val_accuracy: 0.9044
 Epoch 8/8
 313/313 [==============================] - 44s 141ms/step - loss: 0.1778 - accuracy: 0.9283 - val_loss: 0.2127 - val_accuracy: 0.9074
+
+
+ruben.steendam@instance-2:~$ python3 quantization/run.py --model vgg --batch_size 64 --precision mixed --epochs 2
+DEBUG INFO
+TF Version: 2.1.0
+Default GPU Device: /device:GPU:0
+Compute dtype: float16
+Variable dtype: float32
+---
+STARTING TRAINING AND VALIDATION
+model: vgg, batch size: 64, epochs: 2
+precision: mixed
+---
+Splitting data...
+Building generators...
+Found 20000 images belonging to 2 classes.
+Found 5000 images belonging to 2 classes.
+Found 5000 images belonging to 2 classes.
+loading pre-trained models
+'running McNemar's Test'
+5000 items to evaluate
+2% done.
+4% done.
+6% done.
+8% done.
+10% done. yes/yes: 476, yes/no: 19, no/yes: 0, no/no: 5
+12% done.
+14% done.
+16% done.
+18% done.
+20% done. yes/yes: 950, yes/no: 33, no/yes: 0, no/no: 17
+22% done.
+24% done.
+26% done.
+28% done.
+30% done. yes/yes: 1428, yes/no: 51, no/yes: 2, no/no: 19
+32% done.
+34% done.
+36% done.
+ij 38% done.
+40% done. yes/yes: 1908, yes/no: 63, no/yes: 5, no/no: 24
+42% done.
+44% done.
+46% done.
+48% done.
+50% done. yes/yes: 2384, yes/no: 79, no/yes: 6, no/no: 31
+52% done.
+54% done.
+56% done.
+57% done.
+60% done. yes/yes: 2866, yes/no: 93, no/yes: 8, no/no: 33
+62% done.
+64% done.
+66% done.
+68% done.
+70% done. yes/yes: 3345, yes/no: 107, no/yes: 9, no/no: 39
+72% done.
+74% done.
+76% done.
+78% done.
+80% done. yes/yes: 3821, yes/no: 122, no/yes: 13, no/no: 44
+82% done.
+84% done.
+86% done.
+88% done.
+90% done. yes/yes: 4295, yes/no: 140, no/yes: 14, no/no: 51
+92% done.
+94% done.
+96% done.
+98% done.
+100% done. yes/yes: 4775, yes/no: 154, no/yes: 15, no/no: 56
+yes/yes: 4775, yes/no: 154, no/yes: 15, no/no: 56
