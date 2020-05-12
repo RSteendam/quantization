@@ -1,4 +1,4 @@
-IP=34.91.176.196
+IP=34.91.204.43
 
 zip -r quantization.zip . -x *.git* -x *.idea* -x *.DS_Store* -x *__pycache__/* -x __pycache__/
 scp quantization.zip ruben.steendam@$IP:~/

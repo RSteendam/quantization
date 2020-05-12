@@ -17,9 +17,11 @@ from tensorflow.keras.mixed_precision import experimental as mixed_precision
 from tensorflow.keras.applications import resnet_v2, inception_v3, vgg16
 from tensorflow.keras.layers import Dense, GlobalAveragePooling2D, Flatten
 from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.models import Model
+from tensorflow.keras.models import Model, load_model
 
 import tensorflow.keras.backend as K
+
+import itertools
 INPUT_SHAPE = (224, 224, 3)
 
 def main(args):
@@ -44,9 +46,10 @@ def main(args):
     split_data(20000, 5000)
     
     print('Building generators...')
-    train_generator, validation_generator = build_generators(args.batch_size)
-    
-    print('Building model {}...'.format(args.model))
+    train_generator, validation_generator, test_generator = build_generators(args.batch_size)
+
+    print('Building model{}...'.format(args.model))
+
     # weights=None, classes=None
     if args.model == 'vgg':
         base_model = vgg16.VGG16(include_top=False, input_shape=INPUT_SHAPE)
@@ -55,9 +58,24 @@ def main(args):
     elif args.model == 'resnet':
         base_model = resnet_v2.ResNet152V2(include_top=False, input_shape=INPUT_SHAPE)
     model = build_model(base_model)
-    
-    print('Training model {}...'.format(args.model))
-    train(model, train_generator, validation_generator, args.epochs)
+
+    if os.path.exists('float32') and os.path.exists('mixed'):
+        print('loading pre-trained models')
+        model_float32 = load_model('float32')
+        model_mixed = load_model('mixed')
+    else:
+        print('Training model {}...'.format(args.model))
+        set_precision('float32')
+        model_float32 = train(model, train_generator, validation_generator, args.epochs)
+        print('saving model float32')
+        model.save('float32')
+
+        set_precision('mixed')
+        model_mixed = train(model, train_generator, validation_generator, args.epochs)
+        print('saving model mixed')
+        model.save('mixed')
+    mcnemar(model_float32, model_mixed, test_generator)
+
     if False:
         print('running precision')
         trained_model.predict(x=validation_generator, workers=4, verbose=1)
@@ -118,24 +136,28 @@ def split_data(train_size, val_size):
 
 
 def build_generators(batch_size):
-    train_datagen = ImageDataGenerator(
+    generator = ImageDataGenerator(
         rescale=1./255)
 
-    val_gen = ImageDataGenerator(rescale=1./255)
-
-    train_generator = train_datagen.flow_from_directory(
+    train_generator = generator.flow_from_directory(
         'training_data',
         target_size=(224, 224),
         batch_size=batch_size,
         class_mode='binary')
 
-    validation_generator = val_gen.flow_from_directory(
+    validation_generator = generator.flow_from_directory(
         'validation_data',
         target_size=(224, 224),
         batch_size=batch_size,
         class_mode='binary')
+
+    test_generator = generator.flow_from_directory(
+        'validation_data',
+        target_size=(224, 224),
+        batch_size=1,
+        class_mode='binary')
     
-    return train_generator, validation_generator
+    return train_generator, validation_generator, test_generator
 
 
 def build_model(base_model, learn_rate=0.0001):
@@ -156,6 +178,43 @@ def train(model, train_generator, validation_generator, epochs):
     model.fit(train_generator, epochs=epochs, validation_data=validation_generator, workers=4)
 
     return model
+
+def mcnemar(model1, model2, test_generator):
+    print("'running McNemar's Test'")
+    yesyes = 0
+    yesno = 0
+    noyes = 0
+    nono = 0
+    total = len(test_generator)
+    print('{} items to evaluate'.format(total))
+    count = 0
+    for item in test_generator:
+        model1_results = model1.evaluate(item[0], item[1], verbose=0)[1]
+        model2_results = model2.evaluate(item[0], item[1], verbose=0)[1]
+        if model1_results == 1:
+            if model2_results == 1:
+                yesyes+=1
+            elif model2_results == 0:
+                yesno+=1
+            else:
+                print('unknown scenario model1: {}, model2: {}'.format(model1_results, model2_results))
+        elif model1_results == 0:
+            if model2_results == 1:
+                noyes+=1
+            elif model2_results == 0:
+                nono+=1
+            else:
+                print('unknown scenario model1: {}, model2: {}'.format(model1_results, model2_results))
+        else:
+            print('unknown scenario model1: {}, model2: {}'.format(model1_results, model2_results))
+        count += 1
+        if count % 100 == 0:
+            print('{} / {} done. yes/yes: {}, yes/no: {}, no/yes: {}, no/no: {}'.format(count, total, yesyes, yesno, noyes, nono))
+
+
+    print('yes/yes: {}, yes/no: {}, no/yes: {}, no/no: {}'.format(yesyes, yesno, noyes, nono))
+
+
 
 
 if __name__ == "__main__":
