@@ -18,8 +18,11 @@ from tensorflow.keras.applications import resnet_v2, inception_v3, vgg16
 from tensorflow.keras.layers import Dense, GlobalAveragePooling2D, Flatten
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.models import Model, load_model
+from tensorflow.keras.callbacks import ModelCheckpoint
 
 import tensorflow.keras.backend as K
+
+from statsmodels.stats.contingency_tables import mcnemar
 
 INPUT_SHAPE = (224, 224, 3)
 DEBUG = False
@@ -35,7 +38,6 @@ def main(args):
 
     print('STARTING RUN: {}'.format(args.run))
     print('model: {}, batch size: {}, epochs: {}'.format(args.model, args.batch_size, args.epochs))
-    print('precision: {}'.format(args.precision))
     print('---')
     split_data(20000, 5000)
     print('Building generators...')
@@ -54,22 +56,21 @@ def main(args):
 
         print('Training model {} with float32 precision...'.format(args.model))
         set_precision('float32')
-        model_float32 = train(model, train_generator, validation_generator, args.epochs)
-        print('saving model float32')
-        model.save(args.model + '-float32')
+        model_float32 = train(model, train_generator, validation_generator, args.epochs, args.model + '-float32')
+        #print('saving model float32')
 
         print('Training model {} with mixed precision...'.format(args.model))
         set_precision('mixed')
-        model_mixed = train(model, train_generator, validation_generator, args.epochs)
-        print('saving model mixed')
-        model.save(args.model + '-mixed')
+        model_mixed = train(model, train_generator, validation_generator, args.epochs, args.model + '-mixed')
+        #print('saving model mixed')
+        #model.save(args.model + '-mixed')
     elif args.run == 'test':
 
         if os.path.exists('float32') and os.path.exists('mixed'):
             print('loading pre-trained models')
             model_float32 = load_model(args.model + '-float32')
             model_mixed = load_model(args.model + '-mixed')
-            mcnemar(model_float32, model_mixed, test_generator)
+            mcnemar_test(model_float32, model_mixed, test_generator)
         else:
             raise ValueError('no models found')
 
@@ -182,12 +183,16 @@ def build_model(base_model, learn_rate=0.0001):
     return model
 
 
-def train(model, train_generator, validation_generator, epochs):
-    model.fit(train_generator, epochs=epochs, validation_data=validation_generator, workers=4)
+def train(model, train_generator, validation_generator, epochs, filepath):
+    model_checkpoint_callback  = ModelCheckpoint(filepath=filepath,save_weights_only=False, monitor='val_accuracy',
+                                                 mode='max',
+                                                 save_best_only=True,
+                                                 verbose=1)
+    model.fit(train_generator, epochs=epochs, validation_data=validation_generator, workers=4, callbacks=[model_checkpoint_callback])
 
     return model
 
-def mcnemar(model1, model2, test_generator):
+def mcnemar_test(model1, model2, test_generator):
     print("running McNemar's Test")
     yesyes = 0
     yesno = 0
@@ -230,6 +235,19 @@ def mcnemar(model1, model2, test_generator):
 
     print('yes/yes: {}, yes/no: {}, no/yes: {}, no/no: {}'.format(yesyes, yesno, noyes, nono))
 
+    table = [[yesyes, yesno],[noyes,nono]]
+    result = mcnemar(table, exact=False, correction=True)
+
+    # summarize the finding
+    print('statistic=%.3f, p-value=%.3f' % (result.statistic, result.pvalue))
+    # interpret the p-value
+    alpha = 0.05
+    if result.pvalue > alpha:
+        print('Same proportions of errors (fail to reject H0)')
+    else:
+        print('Different proportions of errors (reject H0)')
+
+
 def print_debug(message):
     if DEBUG:
         print(message)
@@ -237,10 +255,6 @@ def print_debug(message):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--precision', 
-        help='Specify precision. float32 (default), float16 or mixed (for mixed precision)', 
-        type=str, choices=['mixed', 'float16', 'float32'], default='float32')
-
     parser.add_argument('--batch_size',
         help='Specify batch_size, default 32.',
         type=int, choices=[16, 32, 64, 128, 256, 512], default=32)
@@ -255,7 +269,7 @@ if __name__ == "__main__":
 
     parser.add_argument('--run',
         help='Specify type of run, train or test, default is train',
-        type=str, choices=['train, test'], default='train')
+        type=str, choices=['train', 'test'], default='train')
 
     args = parser.parse_args()
     main(args)
