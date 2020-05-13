@@ -41,11 +41,15 @@ def main(args):
     print('---')
     split_data(20000, 5000)
     print('Building generators...')
-    train_generator, validation_generator, test_generator = build_generators(args.batch_size)
+    train_generator = build_generator('training_data', args.batch_size)
+    validation_generator = build_generator('validation_data', args.batch_size)
+    float32_path = args.model + '-float32'
+    mixed_path = args.model + '-mixed'
     if args.run == 'train':
+        print('Training model {} with float32 precision...'.format(args.model))
         print('Building model {}...'.format(args.model))
+        set_precision('float32')
 
-        # weights=None, classes=None
         if args.model == 'vgg':
             base_model = vgg16.VGG16(include_top=False, input_shape=INPUT_SHAPE)
         elif args.model == 'inception':
@@ -53,23 +57,28 @@ def main(args):
         elif args.model == 'resnet':
             base_model = resnet_v2.ResNet152V2(include_top=False, input_shape=INPUT_SHAPE)
         model = build_model(base_model)
+        model_float32 = train(model, train_generator, validation_generator, args.epochs, float32_path)
 
-        print('Training model {} with float32 precision...'.format(args.model))
-        set_precision('float32')
-        model_float32 = train(model, train_generator, validation_generator, args.epochs, args.model + '-float32')
-        #print('saving model float32')
 
         print('Training model {} with mixed precision...'.format(args.model))
+        print('Building model {}...'.format(args.model))
         set_precision('mixed')
-        model_mixed = train(model, train_generator, validation_generator, args.epochs, args.model + '-mixed')
-        #print('saving model mixed')
-        #model.save(args.model + '-mixed')
+        if args.model == 'vgg':
+            base_model = vgg16.VGG16(include_top=False, input_shape=INPUT_SHAPE)
+        elif args.model == 'inception':
+            base_model = inception_v3.InceptionV3(include_top=False, input_shape=INPUT_SHAPE)
+        elif args.model == 'resnet':
+            base_model = resnet_v2.ResNet152V2(include_top=False, input_shape=INPUT_SHAPE)
+        model = build_model(base_model)
+        model_mixed = train(model, train_generator, validation_generator, args.epochs, mixed_path)
+
     elif args.run == 'test':
 
-        if os.path.exists('float32') and os.path.exists('mixed'):
+        if os.path.exists(float32_path) and os.path.exists(mixed_path):
             print('loading pre-trained models')
-            model_float32 = load_model(args.model + '-float32')
-            model_mixed = load_model(args.model + '-mixed')
+            model_float32 = load_model(float32_path)
+            model_mixed = load_model(mixed_path)
+            test_generator = build_generator('validation_data', args.batch_size)
             mcnemar_test(model_float32, model_mixed, test_generator)
         else:
             raise ValueError('no models found')
@@ -144,29 +153,17 @@ def split_data(train_size, val_size):
           shutil.copy(fn, os.path.join(val_dir,'dog'))
 
 
-def build_generators(batch_size):
-    generator = ImageDataGenerator(
+def build_generator(directory, batch_size):
+    base_generator = ImageDataGenerator(
         rescale=1./255)
 
-    train_generator = generator.flow_from_directory(
-        'training_data',
+    generator = base_generator.flow_from_directory(
+        directory,
         target_size=(224, 224),
         batch_size=batch_size,
-        class_mode='binary')
-
-    validation_generator = generator.flow_from_directory(
-        'validation_data',
-        target_size=(224, 224),
-        batch_size=batch_size,
-        class_mode='binary')
-
-    test_generator = generator.flow_from_directory(
-        'validation_data',
-        target_size=(224, 224),
-        batch_size=1,
         class_mode='binary')
     
-    return train_generator, validation_generator, test_generator
+    return generator
 
 
 def build_model(base_model, learn_rate=0.0001):
@@ -188,7 +185,9 @@ def train(model, train_generator, validation_generator, epochs, filepath):
                                                  mode='max',
                                                  save_best_only=True,
                                                  verbose=1)
-    model.fit(train_generator, epochs=epochs, validation_data=validation_generator, workers=4, callbacks=[model_checkpoint_callback])
+    #model.fit(train_generator, epochs=epochs, validation_data=validation_generator, workers=4, callbacks=[
+    model.fit(train_generator, epochs=epochs, validation_data=validation_generator, workers=4)
+    # , callbacks=[model_checkpoint_callback])
 
     return model
 
