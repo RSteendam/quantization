@@ -13,3 +13,4 @@ BSc Thesis Quantization
 - [ ] Test with trainable = true
 - [x] Inference is limited by cpu
 - [x] Test training speed with multiple workers -> 4 or 8 seems to be optimal
+- [ ] Test if evaluation is properly using mixed precision

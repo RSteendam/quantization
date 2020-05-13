@@ -41,14 +41,14 @@ def main(args):
     print('---')
     split_data(20000, 5000)
 
-    print('Building generators...')
-    train_generator = build_generator('training_data', args.batch_size)
-    validation_generator = build_generator('validation_data', args.batch_size)
-
     float32_path = args.model + '-float32'
     mixed_path = args.model + '-mixed'
     if args.run == 'train':
         print('---')
+        print('Building generators...')
+        train_generator = build_generator('training_data', args.batch_size)
+        validation_generator = build_generator('validation_data', args.batch_size)
+
         print('Training model {} with mixed precision...'.format(args.model))
         print('Building model {}...'.format(args.model))
         set_precision('mixed')
@@ -82,7 +82,7 @@ def main(args):
             print('loading pre-trained models')
             model_float32 = load_model(float32_path)
             model_mixed = load_model(mixed_path)
-            test_generator = build_generator('validation_data', args.batch_size)
+            test_generator = build_generator('validation_data', 1)
             mcnemar_test(model_float32, model_mixed, test_generator)
         else:
             raise ValueError('no models found')
@@ -201,7 +201,7 @@ def train(model, train_generator, validation_generator, epochs, filepath):
 
     return model
 
-def mcnemar_test(model1, model2, test_generator):
+def mcnemar_test(float32, mixed, test_generator):
     print("running McNemar's Test")
     yesyes = 0
     yesno = 0
@@ -213,9 +213,10 @@ def mcnemar_test(model1, model2, test_generator):
     while index <= test_generator.batch_index:
 
         item = test_generator.next()
-
-        model1_results = model1.evaluate(item[0], item[1], verbose=0)[1]
-        model2_results = model2.evaluate(item[0], item[1], verbose=0)[1]
+        #set_precision('float32')
+        model1_results = float32.evaluate(item[0], item[1], verbose=0)[1]
+        #set_precision('mixed')
+        model2_results = mixed.evaluate(item[0], item[1], verbose=0)[1]
         if model1_results == 1:
             if model2_results == 1:
                 yesyes+=1
