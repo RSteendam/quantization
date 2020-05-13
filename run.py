@@ -25,12 +25,12 @@ import tensorflow.keras.backend as K
 from statsmodels.stats.contingency_tables import mcnemar
 
 INPUT_SHAPE = (224, 224, 3)
-DEBUG = False
+DEBUG = True
 
 def main(args):
     print_debug('TF Version: {}'.format(tf.__version__))
-    if tf.__version__ != "2.1.0":
-        raise ValueError("TensorFlow version should be 2.1.0")
+    if tf.__version__ != "2.2.0":
+        raise ValueError("TensorFlow version should be 2.2.0")
     if tf.test.gpu_device_name():
         print_debug('Default GPU Device: {}'.format(tf.test.gpu_device_name()))
     else:
@@ -40,12 +40,30 @@ def main(args):
     print('model: {}, batch size: {}, epochs: {}'.format(args.model, args.batch_size, args.epochs))
     print('---')
     split_data(20000, 5000)
+
     print('Building generators...')
     train_generator = build_generator('training_data', args.batch_size)
     validation_generator = build_generator('validation_data', args.batch_size)
+
     float32_path = args.model + '-float32'
     mixed_path = args.model + '-mixed'
     if args.run == 'train':
+        print('---')
+        print('Training model {} with mixed precision...'.format(args.model))
+        print('Building model {}...'.format(args.model))
+        set_precision('mixed')
+
+        if args.model == 'vgg':
+            base_model = vgg16.VGG16(include_top=False, input_shape=INPUT_SHAPE)
+        elif args.model == 'inception':
+            base_model = inception_v3.InceptionV3(include_top=False, input_shape=INPUT_SHAPE)
+        elif args.model == 'resnet':
+            base_model = resnet_v2.ResNet152V2(include_top=False, input_shape=INPUT_SHAPE)
+        model = build_model(base_model)
+        model_mixed = train(model, train_generator, validation_generator, args.epochs, mixed_path)
+        #model_mixed.save('testtemp')
+
+        print('---')
         print('Training model {} with float32 precision...'.format(args.model))
         print('Building model {}...'.format(args.model))
         set_precision('float32')
@@ -59,21 +77,7 @@ def main(args):
         model = build_model(base_model)
         model_float32 = train(model, train_generator, validation_generator, args.epochs, float32_path)
 
-
-        print('Training model {} with mixed precision...'.format(args.model))
-        print('Building model {}...'.format(args.model))
-        set_precision('mixed')
-        if args.model == 'vgg':
-            base_model = vgg16.VGG16(include_top=False, input_shape=INPUT_SHAPE)
-        elif args.model == 'inception':
-            base_model = inception_v3.InceptionV3(include_top=False, input_shape=INPUT_SHAPE)
-        elif args.model == 'resnet':
-            base_model = resnet_v2.ResNet152V2(include_top=False, input_shape=INPUT_SHAPE)
-        model = build_model(base_model)
-        model_mixed = train(model, train_generator, validation_generator, args.epochs, mixed_path)
-
     elif args.run == 'test':
-
         if os.path.exists(float32_path) and os.path.exists(mixed_path):
             print('loading pre-trained models')
             model_float32 = load_model(float32_path)
@@ -181,12 +185,18 @@ def build_model(base_model, learn_rate=0.0001):
 
 
 def train(model, train_generator, validation_generator, epochs, filepath):
-    model_checkpoint_callback  = ModelCheckpoint(filepath=filepath,save_weights_only=False, monitor='val_accuracy',
-                                                 mode='max',
-                                                 save_best_only=True,
-                                                 verbose=1)
-    #model.fit(train_generator, epochs=epochs, validation_data=validation_generator, workers=4, callbacks=[
-    model.fit(train_generator, epochs=epochs, validation_data=validation_generator, workers=4)
+    model_checkpoint_callback = ModelCheckpoint(filepath=filepath,
+                                                save_weights_only=False,
+                                                monitor='val_accuracy',
+                                                mode='max',
+                                                save_best_only=True,
+                                                verbose=1)
+    model.fit(train_generator, epochs=epochs, validation_data=validation_generator, workers=4,
+              callbacks=[model_checkpoint_callback], steps_per_epoch=4, validation_steps=2)
+    #
+    #model.load_weights(filepath)
+    #model.save('temp')
+    #
     # , callbacks=[model_checkpoint_callback])
 
     return model
