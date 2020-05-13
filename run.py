@@ -21,39 +21,27 @@ from tensorflow.keras.models import Model, load_model
 
 import tensorflow.keras.backend as K
 
-import itertools
 INPUT_SHAPE = (224, 224, 3)
+DEBUG = False
 
 def main(args):
-    print('DEBUG INFO')
-    print('TF Version: {}'.format(tf.__version__))
+    print_debug('TF Version: {}'.format(tf.__version__))
     if tf.__version__ != "2.1.0":
         raise ValueError("TensorFlow version should be 2.1.0")
     if tf.test.gpu_device_name():
-        print('Default GPU Device: {}'.format(tf.test.gpu_device_name()))
+        print_debug('Default GPU Device: {}'.format(tf.test.gpu_device_name()))
     else:
         raise ValueError("Please install GPU version of TF")
 
-    set_precision(args.precision)
-
-    print('---')
-    print('STARTING TRAINING AND VALIDATION')
+    print('STARTING RUN: {}'.format(args.run))
     print('model: {}, batch size: {}, epochs: {}'.format(args.model, args.batch_size, args.epochs))
     print('precision: {}'.format(args.precision))
-
     print('---')
-    print('Splitting data...')
     split_data(20000, 5000)
-    
     print('Building generators...')
     train_generator, validation_generator, test_generator = build_generators(args.batch_size)
-
-    if os.path.exists('float32') and os.path.exists('mixed'):
-        print('loading pre-trained models')
-        model_float32 = load_model('float32')
-        model_mixed = load_model('mixed')
-    else:
-        print('Building model{}...'.format(args.model))
+    if args.run == 'train':
+        print('Building model {}...'.format(args.model))
 
         # weights=None, classes=None
         if args.model == 'vgg':
@@ -64,19 +52,26 @@ def main(args):
             base_model = resnet_v2.ResNet152V2(include_top=False, input_shape=INPUT_SHAPE)
         model = build_model(base_model)
 
-
-        print('Training model {}...'.format(args.model))
+        print('Training model {} with float32 precision...'.format(args.model))
         set_precision('float32')
         model_float32 = train(model, train_generator, validation_generator, args.epochs)
         print('saving model float32')
-        model.save('float32')
+        model.save(args.model + '-float32')
 
+        print('Training model {} with mixed precision...'.format(args.model))
         set_precision('mixed')
         model_mixed = train(model, train_generator, validation_generator, args.epochs)
         print('saving model mixed')
-        model.save('mixed')
+        model.save(args.model + '-mixed')
+    elif args.run == 'test':
 
-    mcnemar(model_float32, model_mixed, test_generator)
+        if os.path.exists('float32') and os.path.exists('mixed'):
+            print('loading pre-trained models')
+            model_float32 = load_model(args.model + '-float32')
+            model_mixed = load_model(args.model + '-mixed')
+            mcnemar(model_float32, model_mixed, test_generator)
+        else:
+            raise ValueError('no models found')
 
     if False:
         print('running precision')
@@ -92,49 +87,60 @@ def set_precision(precision):
         K.set_floatx(dtype)
         # default is 1e-7 which is too small for float16.  Without adjusting the epsilon, we will get NaN predictions because of divide by zero problems
         K.set_epsilon(1e-4)
+        print_debug('Compute dtype: %s' % 'float16')
+        print_debug('Variable dtype: %s' % 'float16')
     elif precision == 'mixed':
         policy = mixed_precision.Policy('mixed_float16')
         mixed_precision.set_policy(policy)
-        print('Compute dtype: %s' % policy.compute_dtype)
-        print('Variable dtype: %s' % policy.variable_dtype)
+        print_debug('Compute dtype: %s' % policy.compute_dtype)
+        print_debug('Variable dtype: %s' % policy.variable_dtype)
     else:
         policy = mixed_precision.Policy('float32')
         mixed_precision.set_policy(policy)
-        print('Compute dtype: %s' % policy.compute_dtype)
-        print('Variable dtype: %s' % policy.variable_dtype)
+        print_debug('Compute dtype: %s' % policy.compute_dtype)
+        print_debug('Variable dtype: %s' % policy.variable_dtype)
 
 
 def split_data(train_size, val_size):
-  files = glob.glob('data/train/*')
+    train_dir = 'training_data'
+    val_dir = 'validation_data'
 
-  train_files = np.random.choice(files, size=train_size, replace=False)
-  cat_train = [fn for fn in train_files if 'cat' in fn]
-  dog_train = [fn for fn in train_files if 'dog' in fn]
-  
-  files = np.asarray(list(set(files) - set(train_files)))
-  val_files = np.random.choice(files, size=val_size, replace=False)
-  cat_val = [fn for fn in val_files if 'cat' in fn]
-  dog_val = [fn for fn in val_files if 'dog' in fn]
+    train_files = sum([len(files) for r, d, files in os.walk(train_dir)])
+    val_files =  sum([len(files) for r, d, files in os.walk(val_dir)])
 
-  train_dir = 'training_data'
-  val_dir = 'validation_data'
+    if train_files == train_size and val_files == val_size:
+        print('Data is already split')
+    else:
+        print('Splitting data...')
+        files = glob.glob('data/train/*')
 
-  os.mkdir(train_dir) if not os.path.isdir(train_dir) else None
-  os.mkdir(os.path.join(train_dir,'cat')) if not os.path.isdir(os.path.join(train_dir,'cat')) else None
-  os.mkdir(os.path.join(train_dir,'dog')) if not os.path.isdir(os.path.join(train_dir,'dog')) else None
-  os.mkdir(val_dir) if not os.path.isdir(val_dir) else None
-  os.mkdir(os.path.join(val_dir,'cat')) if not os.path.isdir(os.path.join(val_dir,'cat')) else None
-  os.mkdir(os.path.join(val_dir,'dog')) if not os.path.isdir(os.path.join(val_dir,'dog')) else None
+        train_files = np.random.choice(files, size=train_size, replace=False)
+        cat_train = [fn for fn in train_files if 'cat' in fn]
+        dog_train = [fn for fn in train_files if 'dog' in fn]
 
-  for fn in cat_train:
-      shutil.copy(fn, os.path.join(train_dir,'cat'))
-  for fn in dog_train:
-      shutil.copy(fn, os.path.join(train_dir,'dog'))
+        files = np.asarray(list(set(files) - set(train_files)))
+        val_files = np.random.choice(files, size=val_size, replace=False)
+        cat_val = [fn for fn in val_files if 'cat' in fn]
+        dog_val = [fn for fn in val_files if 'dog' in fn]
 
-  for fn in cat_val:
-      shutil.copy(fn, os.path.join(val_dir,'cat'))
-  for fn in dog_val:
-      shutil.copy(fn, os.path.join(val_dir,'dog'))
+
+
+        os.mkdir(train_dir) if not os.path.isdir(train_dir) else None
+        os.mkdir(os.path.join(train_dir,'cat')) if not os.path.isdir(os.path.join(train_dir,'cat')) else None
+        os.mkdir(os.path.join(train_dir,'dog')) if not os.path.isdir(os.path.join(train_dir,'dog')) else None
+        os.mkdir(val_dir) if not os.path.isdir(val_dir) else None
+        os.mkdir(os.path.join(val_dir,'cat')) if not os.path.isdir(os.path.join(val_dir,'cat')) else None
+        os.mkdir(os.path.join(val_dir,'dog')) if not os.path.isdir(os.path.join(val_dir,'dog')) else None
+
+        for fn in cat_train:
+          shutil.copy(fn, os.path.join(train_dir,'cat'))
+        for fn in dog_train:
+          shutil.copy(fn, os.path.join(train_dir,'dog'))
+
+        for fn in cat_val:
+          shutil.copy(fn, os.path.join(val_dir,'cat'))
+        for fn in dog_val:
+          shutil.copy(fn, os.path.join(val_dir,'dog'))
 
 
 def build_generators(batch_size):
@@ -224,7 +230,9 @@ def mcnemar(model1, model2, test_generator):
 
     print('yes/yes: {}, yes/no: {}, no/yes: {}, no/no: {}'.format(yesyes, yesno, noyes, nono))
 
-
+def print_debug(message):
+    if DEBUG:
+        print(message)
 
 
 if __name__ == "__main__":
