@@ -1,0 +1,17 @@
+ResNet
+yes/yes: 4938, yes/no: 10, no/yes: 12, no/no: 40
+standard
+statistic=10.000, p-value=0.832
+Same proportions of errors (fail to reject H0)
+
+Inception
+yes/yes: 4929, yes/no: 12, no/yes: 15, no/no: 44
+standard
+statistic=12.000, p-value=0.701
+Same proportions of errors (fail to reject H0)
+
+VGG
+yes/yes: 4562, yes/no: 26, no/yes: 19, no/no: 393
+standard
+statistic=19.000, p-value=0.371
+Same proportions of errors (fail to reject H0)

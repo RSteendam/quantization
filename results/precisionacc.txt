@@ -1,0 +1,16 @@
+float32 scores:
+79/79 [==============================] - 14s 182ms/step - loss: 0.0304 - accuracy: 0.9908
+79/79 [==============================] - 14s 180ms/step - loss: 0.0277 - accuracy: 0.9916
+mixed scores:
+79/79 [==============================] - 9s 110ms/step - loss: 0.0373 - accuracy: 0.9880
+79/79 [==============================] - 9s 111ms/step - loss: 0.0367 - accuracy: 0.9870
+---
+setting precision to mixed
+Compute dtype: float16
+Variable dtype: float32
+float32 scores:
+79/79 [==============================] - 14s 179ms/step - loss: 0.0297 - accuracy: 0.9914
+79/79 [==============================] - 14s 180ms/step - loss: 0.0332 - accuracy: 0.9900
+mixed scores:
+79/79 [==============================] - 9s 111ms/step - loss: 0.0294 - accuracy: 0.9894
+79/79 [==============================] - 9s 111ms/step - loss: 0.0337 - accuracy: 0.9886

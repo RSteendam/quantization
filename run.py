@@ -5,7 +5,7 @@ import numpy as np
 import argparse
 
 import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 # set the pseudo-random generator to a constant, so the training results are comparable
 np.random.seed(42)
@@ -192,12 +192,7 @@ def train(model, train_generator, validation_generator, epochs, filepath):
                                                 save_best_only=True,
                                                 verbose=1)
     model.fit(train_generator, epochs=epochs, validation_data=validation_generator, workers=4,
-              callbacks=[model_checkpoint_callback], steps_per_epoch=4, validation_steps=2)
-    #
-    #model.load_weights(filepath)
-    #model.save('temp')
-    #
-    # , callbacks=[model_checkpoint_callback])
+              callbacks=[model_checkpoint_callback], steps_per_epoch=len(train_generator), validation_steps=len(validation_generator))
 
     return model
 
@@ -246,7 +241,16 @@ def mcnemar_test(float32, mixed, test_generator):
     print('yes/yes: {}, yes/no: {}, no/yes: {}, no/no: {}'.format(yesyes, yesno, noyes, nono))
 
     table = [[yesyes, yesno],[noyes,nono]]
-    result = mcnemar(table, exact=False, correction=True)
+    table2 = np.array(table)
+    if table2.min() >= 25:
+        print('binomial')
+        result = mcnemar(table, exact=False, correction=True)
+    else:
+        print('standard')
+        result = mcnemar(table, exact=True)
+
+
+
 
     # summarize the finding
     print('statistic=%.3f, p-value=%.3f' % (result.statistic, result.pvalue))
@@ -262,6 +266,36 @@ def print_debug(message):
     if DEBUG:
         print(message)
 
+
+def test_mixed(mixed_model, float_model, validation_generator):
+    base_generator = validation_generator
+    test_generator = base_generator
+    print('---')
+    print('setting precision to float32')
+    set_precision('float32')
+    print('float32 scores:')
+    test_generator = base_generator
+    float_model.evaluate(validation_generator, verbose=1, steps=len(test_generator), workers=4)
+    test_generator = base_generator
+    float_model.evaluate(validation_generator, verbose=1, steps=len(test_generator), workers=4)
+    print('mixed scores:')
+    test_generator = base_generator
+    mixed_model.evaluate(validation_generator, verbose=1, steps=len(test_generator), workers=4)
+    test_generator = base_generator
+    mixed_model.evaluate(validation_generator, verbose=1, steps=len(test_generator), workers=4)
+    print('---')
+    print('setting precision to mixed')
+    set_precision('mixed')
+    print('float32 scores:')
+    test_generator = base_generator
+    float_model.evaluate(validation_generator, verbose=1, steps=len(test_generator), workers=4)
+    test_generator = base_generator
+    float_model.evaluate(validation_generator, verbose=1, steps=len(test_generator), workers=4)
+    print('mixed scores:')
+    test_generator = base_generator
+    mixed_model.evaluate(validation_generator, verbose=1, steps=len(test_generator), workers=4)
+    test_generator = base_generator
+    mixed_model.evaluate(validation_generator, verbose=1, steps=len(test_generator), workers=4)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

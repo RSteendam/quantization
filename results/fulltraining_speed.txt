@@ -1,0 +1,185 @@
+Training model vgg with mixed precision...
+Building model vgg...
+Compute dtype: float16
+Variable dtype: float32
+Epoch 1/8
+313/313 [==============================] - ETA: 0s - accuracy: 0.8327 - loss: 0.4397
+Epoch 00001: val_accuracy improved from -inf to 0.87600, saving model to vgg-mixed
+WARNING:tensorflow:From /home/ruben.steendam/.local/lib/python3.5/site-packages/tensorflow/python/ops/resource_variable_ops.py:1817: calling BaseResourceVariable.__init__ (from tensorflow.python.ops.resource_variable_ops) with constraint is deprecated and will be removed in a future version.
+Instructions for updating:
+313/313 [==============================] - 43s 137ms/step - accuracy: 0.8327 - loss: 0.4397 - val_accuracy: 0.8760 - val_loss: 0.3270
+Epoch 2/8
+312/313 [============================>.] - ETA: 0s - accuracy: 0.8960 - loss: 0.2746
+313/313 [==============================] - 42s 133ms/step - accuracy: 0.8961 - loss: 0.2745 - val_accuracy: 0.8976 - val_loss: 0.2607
+Epoch 3/8
+312/313 [============================>.] - ETA: 0s - accuracy: 0.9101 - loss: 0.2305
+313/313 [==============================] - 40s 128ms/step - accuracy: 0.9100 - loss: 0.2306 - val_accuracy: 0.8970 - val_loss: 0.2455
+Epoch 4/8
+312/313 [============================>.] - ETA: 0s - accuracy: 0.9172 - loss: 0.2097
+313/313 [==============================] - 41s 132ms/step - accuracy: 0.9172 - loss: 0.2096 - val_accuracy: 0.9152 - val_loss: 0.2112
+Epoch 5/8
+312/313 [============================>.] - ETA: 0s - accuracy: 0.9218 - loss: 0.1977
+313/313 [==============================] - 40s 128ms/step - accuracy: 0.9216 - loss: 0.1978 - val_accuracy: 0.9110 - val_loss: 0.2115
+Epoch 6/8
+312/313 [============================>.] - ETA: 0s - accuracy: 0.9264 - loss: 0.1890
+313/313 [==============================] - 40s 128ms/step - accuracy: 0.9265 - loss: 0.1888 - val_accuracy: 0.9068 - val_loss: 0.2151
+Epoch 7/8
+312/313 [============================>.] - ETA: 0s - accuracy: 0.9274 - loss: 0.1823
+313/313 [==============================] - 42s 134ms/step - accuracy: 0.9275 - loss: 0.1822 - val_accuracy: 0.9184 - val_loss: 0.2035
+Epoch 8/8
+312/313 [============================>.] - ETA: 0s - accuracy: 0.9290 - loss: 0.1778
+313/313 [==============================] - 40s 127ms/step - accuracy: 0.9291 - loss: 0.1778 - val_accuracy: 0.9086 - val_loss: 0.2074
+---
+Training model vgg with float32 precision...
+Building model vgg...
+Compute dtype: float32
+Variable dtype: float32
+Epoch 1/8
+313/313 [==============================] - ETA: 0s - accuracy: 0.8479 - loss: 0.4306
+313/313 [==============================] - 55s 175ms/step - accuracy: 0.8479 - loss: 0.4306 - val_accuracy: 0.8748 - val_loss: 0.3260
+Epoch 2/8
+313/313 [==============================] - ETA: 0s - accuracy: 0.8956 - loss: 0.2739
+313/313 [==============================] - 54s 172ms/step - accuracy: 0.8956 - loss: 0.2739 - val_accuracy: 0.8922 - val_loss: 0.2620
+Epoch 3/8
+313/313 [==============================] - ETA: 0s - accuracy: 0.9097 - loss: 0.2319
+313/313 [==============================] - 53s 169ms/step - accuracy: 0.9097 - loss: 0.2319 - val_accuracy: 0.9014 - val_loss: 0.2387
+Epoch 4/8
+313/313 [==============================] - ETA: 0s - accuracy: 0.9165 - loss: 0.2110
+313/313 [==============================] - 52s 165ms/step - accuracy: 0.9165 - loss: 0.2110 - val_accuracy: 0.9040 - val_loss: 0.2277
+Epoch 5/8
+313/313 [==============================] - ETA: 0s - accuracy: 0.9214 - loss: 0.1984
+313/313 [==============================] - 52s 167ms/step - accuracy: 0.9214 - loss: 0.1984 - val_accuracy: 0.9092 - val_loss: 0.2229
+Epoch 6/8
+313/313 [==============================] - ETA: 0s - accuracy: 0.9247 - loss: 0.1906
+313/313 [==============================] - 53s 171ms/step - accuracy: 0.9247 - loss: 0.1906 - val_accuracy: 0.9172 - val_loss: 0.1984
+Epoch 7/8
+313/313 [==============================] - ETA: 0s - accuracy: 0.9257 - loss: 0.313/313 [==============================] - 52s 167ms/step - accuracy: 0.9257 - loss: 0.1832 - val_accuracy: 0.9098 - val_loss: 0.20860
+Epoch 8/8
+313/313 [==============================] - ETA: 0s - accuracy: 0.9291 - loss: 0.1791
+313/313 [==============================] - 54s 172ms/step - accuracy: 0.9291 - loss: 0.1791 - val_accuracy: 0.9182 - val_loss: 0.2008
+Exception ignored in: <function WeakValueDictionary.__init__.<locals>.remove at 0x7f8b40f55bf8>
+Traceback (most recent call last):
+  File "/usr/lib/python3.5/weakref.py", line 117, in remove
+TypeError: 'NoneType' object is not callabl
+
+Building model inception...
+Compute dtype: float16
+Variable dtype: float32
+Epoch 1/8
+313/313 [==============================] - ETA: 0s - loss: 0.0525 - accuracy: 0.9813
+Epoch 00001: val_accuracy improved from -inf to 0.98580, saving model to inception-mixed
+WARNING:tensorflow:From /home/ruben.steendam/.local/lib/python3.5/site-packages/tensorflow/python/ops/resource_variable_ops.py:1817: calling BaseResourceVariable.__init__ (from te
+nsorflow.python.ops.resource_variable_ops) with constraint is deprecated and will be removed in a future version.
+Instructions for updating:
+313/313 [==============================] - 65s 206ms/step - loss: 0.0525 - accuracy: 0.9813 - val_accuracy: 0.9858 - val_loss: 0.0405
+Epoch 2/8
+312/313 [============================>.] - ETA: 0s - loss: 0.0318 - accuracy: 0.9894
+313/313 [==============================] - 63s 201ms/step - loss: 0.0318 - accuracy: 0.9894 - val_accuracy: 0.9874 - val_loss: 0.0373
+Epoch 3/8
+312/313 [============================>.] - ETA: 0s - loss: 0.0237 - accuracy: 0.9916
+313/313 [==============================] - 34s 109ms/step - loss: 0.0237 - accuracy: 0.9916 - val_accuracy: 0.9872 - val_loss: 0.0365
+Epoch 4/8
+312/313 [============================>.] - ETA: 0s - loss: 0.0184 - accuracy: 0.9940
+313/313 [==============================] - 64s 203ms/step - loss: 0.0185 - accuracy: 0.9940 - val_accuracy: 0.9892 - val_loss: 0.0318
+Epoch 5/8
+312/313 [============================>.] - ETA: 0s - loss: 0.0141 - accuracy: 0.9956
+313/313 [==============================] - 33s 106ms/step - loss: 0.0141 - accuracy: 0.9956 - val_accuracy: 0.9888 - val_loss: 0.0377
+Epoch 6/8
+312/313 [============================>.] - ETA: 0s - loss: 0.0103 - accuracy: 0.9969
+313/313 [==============================] - 34s 108ms/step - loss: 0.0103 - accuracy: 0.9969 - val_accuracy: 0.9840 - val_loss: 0.0567
+Epoch 7/8
+312/313 [============================>.] - ETA: 0s - loss: 0.0080 - accuracy: 0.9977
+313/313 [==============================] - 34s 109ms/step - loss: 0.0080 - accuracy: 0.9977 - val_accuracy: 0.9884 - val_loss: 0.0365
+Epoch 8/8
+312/313 [============================>.] - ETA: 0s - loss: 0.0060 - accuracy: 0.9989
+313/313 [==============================] - 34s 109ms/step - loss: 0.0060 - accuracy: 0.9990 - val_accuracy: 0.9884 - val_loss: 0.0428
+---
+Training model inception with float32 precision...
+Building model inception...
+Compute dtype: float32
+Variable dtype: float32
+Epoch 1/8
+313/313 [==============================] - ETA: 0s - loss: 0.0583 - accuracy: 0.9796
+313/313 [==============================] - 67s 214ms/step - loss: 0.0583 - accuracy: 0.9796 - val_accuracy: 0.9864 - val_loss: 0.0408
+Epoch 2/8
+313/313 [==============================] - ETA: 0s - loss: 0.0303 - accuracy: 0.9893
+313/313 [==============================] - 67s 213ms/step - loss: 0.0303 - accuracy: 0.9893 - val_accuracy: 0.9868 - val_loss: 0.0359
+Epoch 3/8
+313/313 [==============================] - ETA: 0s - loss: 0.0240 - accuracy: 0.9916
+313/313 [==============================] - 66s 210ms/step - loss: 0.0240 - accuracy: 0.9916 - val_accuracy: 0.9880 - val_loss: 0.0341
+Epoch 4/8
+313/313 [==============================] - ETA: 0s - loss: 0.0207 - accuracy: 0.9930
+313/313 [==============================] - 66s 211ms/step - loss: 0.0207 - accuracy: 0.9930 - val_accuracy: 0.9906 - val_loss: 0.0282
+Epoch 5/8
+313/313 [==============================] - ETA: 0s - loss: 0.0158 - accuracy: 0.9941
+313/313 [==============================] - 36s 116ms/step - loss: 0.0158 - accuracy: 0.9941 - val_accuracy: 0.9870 - val_loss: 0.0405
+Epoch 6/8
+313/313 [==============================] - ETA: 0s - loss: 0.0114 - accuracy: 0.9962
+313/313 [==============================] - 37s 117ms/step - loss: 0.0114 - accuracy: 0.9962 - val_accuracy: 0.9870 - val_loss: 0.0359
+Epoch 7/8
+313/313 [==============================] - ETA: 0s - loss: 0.0078 - accuracy: 0.9980
+313/313 [==============================] - 37s 117ms/step - loss: 0.0078 - accuracy: 0.9980 - val_accuracy: 0.9876 - val_loss: 0.0371
+Epoch 8/8
+313/313 [==============================] - ETA: 0s - loss: 0.0055 - accuracy: 0.9989
+313/313 [==============================] - 36s 117ms/step - loss: 0.0055 - accuracy: 0.9989 - val_accuracy: 0.9894 - val_loss: 0.0406
+
+Building model resnet...
+Compute dtype: float16
+Variable dtype: float32
+Epoch 1/8
+313/313 [==============================] - ETA: 0s - loss: 0.0435 - accuracy: 0.9833
+Epoch 00001: val_accuracy improved from -inf to 0.98840, saving model to resnet-mixed
+WARNING:tensorflow:From /home/ruben.steendam/.local/lib/python3.5/site-packages/tensorflow/python/ops/resource_variable_ops.py:1817: calling BaseResourceVariable.__init__ (from te
+nsorflow.python.ops.resource_variable_ops) with constraint is deprecated and will be removed in a future version.
+Instructions for updating:
+313/313 [==============================] - 99s 316ms/step - loss: 0.0435 - accuracy: 0.9833 - val_loss: 0.0343 - val_accuracy: 0.9884
+Epoch 2/8
+312/313 [============================>.] - ETA: 0s - loss: 0.0203 - accuracy: 0.9933
+313/313 [==============================] - 98s 313ms/step - loss: 0.0202 - accuracy: 0.9933 - val_loss: 0.0309 - val_accuracy: 0.9896
+Epoch 3/8
+312/313 [============================>.] - ETA: 0s - loss: 0.0131 - accuracy: 0.9959
+313/313 [==============================] - 98s 313ms/step - loss: 0.0131 - accuracy: 0.9959 - val_loss: 0.0312 - val_accuracy: 0.9898
+Epoch 4/8
+312/313 [============================>.] - ETA: 0s - loss: 0.0080 - accuracy: 0.9980
+313/313 [==============================] - 44s 141ms/step - loss: 0.0079 - accuracy: 0.9980 - val_loss: 0.0290 - val_accuracy: 0.9896
+Epoch 5/8
+313/313 [==============================] - ETA: 0s - loss: 0.0046 - accuracy: 0.9995
+313/313 [==============================] - 44s 141ms/step - loss: 0.0046 - accuracy: 0.9995 - val_loss: 0.0326 - val_accuracy: 0.9894
+Epoch 6/8
+312/313 [============================>.] - ETA: 0s - loss: 0.0028 - accuracy: 0.9997
+313/313 [==============================] - 98s 312ms/step - loss: 0.0028 - accuracy: 0.9997 - val_loss: 0.0299 - val_accuracy: 0.9912
+Epoch 7/8
+313/313 [==============================] - ETA: 0s - loss: 0.0022 - accuracy: 0.9998
+313/313 [==============================] - 44s 141ms/step - loss: 0.0022 - accuracy: 0.9998 - val_loss: 0.0274 - val_accuracy: 0.9900
+Epoch 8/8
+313/313 [==============================] - ETA: 0s - loss: 0.0017 - accuracy: 0.9999
+313/313 [==============================] - 44s 142ms/step - loss: 0.0017 - accuracy: 0.9999 - val_loss: 0.0348 - val_accuracy: 0.9894
+---
+Training model resnet with float32 precision...
+Building model resnet...
+Compute dtype: float32
+Variable dtype: float32
+Epoch 1/8
+313/313 [==============================] - ETA: 0s - loss: 0.0453 - accuracy: 0.9818
+313/313 [==============================] - 125s 399ms/step - loss: 0.0453 - accuracy: 0.9818 - val_loss: 0.0282 - val_accuracy: 0.9894
+Epoch 2/8
+313/313 [==============================] - ETA: 0s - loss: 0.0217 - accuracy: 0.9929
+313/313 [==============================] - 71s 227ms/step - loss: 0.0217 - accuracy: 0.9929 - val_loss: 0.0399 - val_accuracy: 0.9874
+Epoch 3/8
+313/313 [==============================] - ETA: 0s - loss: 0.0142 - accuracy: 0.9955
+313/313 [==============================] - 125s 398ms/step - loss: 0.0142 - accuracy: 0.9955 - val_loss: 0.0344 - val_accuracy: 0.9896
+Epoch 4/8
+313/313 [==============================] - ETA: 0s - loss: 0.0086 - accuracy: 0.9978
+313/313 [==============================] - 126s 402ms/step - loss: 0.0086 - accuracy: 0.9978 - val_loss: 0.0261 - val_accuracy: 0.9904
+Epoch 5/8
+313/313 [==============================] - ETA: 0s - loss: 0.0059 - accuracy: 0.9988
+313/313 [==============================] - 71s 227ms/step - loss: 0.0059 - accuracy: 0.9988 - val_loss: 0.0349 - val_accuracy: 0.9882
+Epoch 6/8
+313/313 [==============================] - ETA: 0s - loss: 0.0031 - accuracy: 0.9998
+313/313 [==============================] - 125s 400ms/step - loss: 0.0031 - accuracy: 0.9998 - val_loss: 0.0272 - val_accuracy: 0.9910
+Epoch 7/8
+313/313 [==============================] - ETA: 0s - loss: 0.0024 - accuracy: 0.9998
+313/313 [==============================] - 70s 224ms/step - loss: 0.0024 - accuracy: 0.9998 - val_loss: 0.0317 - val_accuracy: 0.9902
+Epoch 8/8
+313/313 [==============================] - ETA: 0s - loss: 0.0017 - accuracy: 0.9999
+313/313 [==============================] - 70s 223ms/step - loss: 0.0017 - accuracy: 0.9999 - val_loss: 0.0338 - val_accuracy: 0.9900
