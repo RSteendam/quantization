@@ -60,7 +60,7 @@ def main(args):
         elif args.model == 'resnet':
             base_model = resnet_v2.ResNet152V2(include_top=False, input_shape=INPUT_SHAPE)
         model = build_model(base_model)
-        model_mixed = train(model, train_generator, validation_generator, args.epochs, mixed_path)
+        model_mixed = train(model, train_generator, validation_generator, args.epochs, filepath=mixed_path)
         #model_mixed.save('testtemp')
 
         print('---')
@@ -75,7 +75,7 @@ def main(args):
         elif args.model == 'resnet':
             base_model = resnet_v2.ResNet152V2(include_top=False, input_shape=INPUT_SHAPE)
         model = build_model(base_model)
-        model_float32 = train(model, train_generator, validation_generator, args.epochs, float32_path)
+        model_float32 = train(model, train_generator, validation_generator, args.epochs, filepath=float32_path)
 
     elif args.run == 'test':
         if os.path.exists(float32_path) and os.path.exists(mixed_path):
@@ -84,6 +84,54 @@ def main(args):
             model_mixed = load_model(mixed_path)
             test_generator = build_generator('validation_data', 1)
             mcnemar_test(model_float32, model_mixed, test_generator)
+        else:
+            raise ValueError('no models found')
+
+    elif args.run == 'training-speed':
+        print('---')
+        print('Building generators...')
+        train_generator = build_generator('training_data', args.batch_size)
+        validation_generator = build_generator('validation_data', args.batch_size)
+
+        print('Training model {} with mixed precision...'.format(args.model))
+        print('Building model {}...'.format(args.model))
+        set_precision('mixed')
+
+        if args.model == 'vgg':
+            base_model = vgg16.VGG16(include_top=False, input_shape=INPUT_SHAPE)
+        elif args.model == 'inception':
+            base_model = inception_v3.InceptionV3(include_top=False, input_shape=INPUT_SHAPE)
+        elif args.model == 'resnet':
+            base_model = resnet_v2.ResNet152V2(include_top=False, input_shape=INPUT_SHAPE)
+        model = build_model(base_model, trainable=True)
+        train(model, train_generator, validation_generator, 2)
+
+        print('---')
+        print('Training model {} with float32 precision...'.format(args.model))
+        print('Building model {}...'.format(args.model))
+        set_precision('float32')
+
+        if args.model == 'vgg':
+            base_model = vgg16.VGG16(include_top=False, input_shape=INPUT_SHAPE)
+        elif args.model == 'inception':
+            base_model = inception_v3.InceptionV3(include_top=False, input_shape=INPUT_SHAPE)
+        elif args.model == 'resnet':
+            base_model = resnet_v2.ResNet152V2(include_top=False, input_shape=INPUT_SHAPE)
+        model = build_model(base_model, trainable=True)
+        train(model, train_generator, validation_generator, 2)
+
+    elif args.run == 'inference-speed':
+        if os.path.exists(float32_path) and os.path.exists(mixed_path):
+            print('loading pre-trained models')
+            model_float32 = load_model(float32_path)
+            model_mixed = load_model(mixed_path)
+            test_generator = build_generator('validation_data', args.batch_size)
+            print('---')
+            print('float32 results')
+            test_inference_speed(model_float32, test_generator)
+            print('mixed results')
+            test_inference_speed(model_mixed, test_generator)
+
         else:
             raise ValueError('no models found')
 
@@ -170,9 +218,9 @@ def build_generator(directory, batch_size):
     return generator
 
 
-def build_model(base_model, learn_rate=0.0001):
+def build_model(base_model, learn_rate=0.0001, trainable=False):
     for layer in base_model.layers:
-      layer.trainable = False
+      layer.trainable = trainable
     x = base_model.output
     x=GlobalAveragePooling2D()(x)
     x=Dense(1024,activation='relu')(x)
@@ -184,15 +232,18 @@ def build_model(base_model, learn_rate=0.0001):
     return model
 
 
-def train(model, train_generator, validation_generator, epochs, filepath):
-    model_checkpoint_callback = ModelCheckpoint(filepath=filepath,
-                                                save_weights_only=False,
-                                                monitor='val_accuracy',
-                                                mode='max',
-                                                save_best_only=True,
-                                                verbose=1)
-    model.fit(train_generator, epochs=epochs, validation_data=validation_generator, workers=4,
-              callbacks=[model_checkpoint_callback], steps_per_epoch=len(train_generator), validation_steps=len(validation_generator))
+def train(model, train_generator, validation_generator, epochs, filepath=None):
+    if filepath != None:
+        model_checkpoint_callback = ModelCheckpoint(filepath=filepath,
+                                                    save_weights_only=False,
+                                                    monitor='val_accuracy',
+                                                    mode='max',
+                                                    save_best_only=True,
+                                                    verbose=1)
+        model.fit(train_generator, epochs=epochs, validation_data=validation_generator, workers=4,
+                  callbacks=[model_checkpoint_callback], steps_per_epoch=len(train_generator), validation_steps=len(validation_generator))
+    else:
+        model.fit(train_generator, epochs=epochs, workers=4, steps_per_epoch=len(train_generator))
 
     return model
 
@@ -297,11 +348,15 @@ def test_mixed(mixed_model, float_model, validation_generator):
     test_generator = base_generator
     mixed_model.evaluate(validation_generator, verbose=1, steps=len(test_generator), workers=4)
 
+
+def test_inference_speed(model, test_generator):
+    model.evaluate(test_generator, verbose=1, steps=len(test_generator), workers=4)
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--batch_size',
         help='Specify batch_size, default 32.',
-        type=int, choices=[16, 32, 64, 128, 256, 512], default=32)
+        type=int, choices=[16, 32, 64, 128], default=64)
     
     parser.add_argument('--epochs',
         help='Specify number of epochs, default 8',
@@ -313,7 +368,7 @@ if __name__ == "__main__":
 
     parser.add_argument('--run',
         help='Specify type of run, train or test, default is train',
-        type=str, choices=['train', 'test'], default='train')
+        type=str, choices=['train', 'test', 'training-speed', 'inference-speed'], default='train')
 
     args = parser.parse_args()
     main(args)

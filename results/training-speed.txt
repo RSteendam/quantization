@@ -1,0 +1,71 @@
+model: resnet, batch size: 64, epochs: 8
+---
+Data is already split
+---
+Building generators...
+Found 20000 images belonging to 2 classes.
+Found 5000 images belonging to 2 classes.
+Training model resnet with mixed precision...
+Building model resnet...
+Compute dtype: float16
+Variable dtype: float32
+Epoch 1/2
+313/313 [==============================] - 85s 273ms/step - accuracy: 0.9731 - loss: 0.0702
+Epoch 2/2
+313/313 [==============================] - 85s 271ms/step - accuracy: 0.9912 - loss: 0.0277
+---
+Training model resnet with float32 precision...
+Building model resnet...
+Compute dtype: float32
+Variable dtype: float32
+Epoch 1/2
+313/313 [==============================] - 155s 495ms/step - accuracy: 0.9761 - loss: 0.0655
+Epoch 2/2
+313/313 [==============================] - 154s 492ms/step - accuracy: 0.9902 - loss: 0.0296
+
+
+model: inception, batch size: 64, epochs: 8
+---
+Data is already split
+---
+Building generators...
+Found 20000 images belonging to 2 classes.
+Found 5000 images belonging to 2 classes.
+Training model inception with mixed precision...
+Building model inception...
+Compute dtype: float16
+Variable dtype: float32
+Epoch 1/2
+313/313 [==============================] - 41s 132ms/step - loss: 0.0661 - accuracy: 0.9748
+Epoch 2/2
+313/313 [==============================] - 42s 133ms/step - loss: 0.0147 - accuracy: 0.9949
+---
+Training model inception with float32 precision...
+Building model inception...
+Compute dtype: float32
+Variable dtype: float32
+Epoch 1/2
+313/313 [==============================] - 62s 199ms/step - loss: 0.0635 - accuracy: 0.9758
+Epoch 2/2
+313/313 [==============================] - 61s 195ms/step - loss: 0.0182 - accuracy: 0.9938
+
+
+Found 20000 images belonging to 2 classes.
+Found 5000 images belonging to 2 classes.
+Training model vgg with mixed precision...
+Building model vgg...
+Compute dtype: float16
+Variable dtype: float32
+Epoch 1/2
+313/313 [==============================] - 62s 199ms/step - accuracy: 0.8965 - loss: 0.2142
+Epoch 2/2
+313/313 [==============================] - 61s 196ms/step - accuracy: 0.9743 - loss: 0.0666
+---
+Training model vgg with float32 precision...
+Building model vgg...
+Compute dtype: float32
+Variable dtype: float32
+Epoch 1/2
+313/313 [==============================] - 96s 308ms/step - accuracy: 0.9398 - loss: 0.1411
+Epoch 2/2
+313/313 [==============================] - 95s 303ms/step - accuracy: 0.9771 - loss: 0.0595

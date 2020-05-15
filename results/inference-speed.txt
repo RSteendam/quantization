@@ -1,0 +1,47 @@
+ruben.steendam@instance-2:~$ python3 quantization/run.py --run inference-speed --model vgg
+Default GPU Device: /device:GPU:0
+TF Version: 2.2.0
+STARTING RUN: inference-speed
+model: vgg, batch size: 64, epochs: 8
+---
+Data is already split
+loading pre-trained models
+Found 5000 images belonging to 2 classes.
+---
+float32 precision
+float32 results
+79/79 [==============================] - 11s 138ms/step - accuracy: 0.9176 - loss: 0.2028
+mixed results
+79/79 [==============================] - 8s 100ms/step - accuracy: 0.9152 - loss: 0.2033
+
+ruben.steendam@instance-2:~$ python3 quantization/run.py --run inference-speed --model inception
+TF Version: 2.2.0
+Default GPU Device: /device:GPU:0
+STARTING RUN: inference-speed
+model: inception, batch size: 64, epochs: 8
+---
+Data is already split
+loading pre-trained models
+Found 5000 images belonging to 2 classes.
+---
+float32 precision
+float32 results
+79/79 [==============================] - 8s 97ms/step - accuracy: 0.9882 - loss: 0.0340
+mixed results
+79/79 [==============================] - 7s 87ms/step - accuracy: 0.9892 - loss: 0.0343
+
+ruben.steendam@instance-2:~$ python3 quantization/run.py --run inference-speed --model resnet
+TF Version: 2.2.0
+Default GPU Device: /device:GPU:0
+STARTING RUN: inference-speed
+model: resnet, batch size: 64, epochs: 8
+---
+Data is already split
+loading pre-trained models
+Found 5000 images belonging to 2 classes.
+---
+float32 precision
+float32 results
+79/79 [==============================] - 14s 180ms/step - loss: 0.0336 - accuracy: 0.9896
+mixed results
+79/79 [==============================] - 9s 108ms/step - loss: 0.0323 - accuracy: 0.9894
