@@ -1,7 +1,8 @@
-IP=35.204.12.177
+IP=###
+USER=###
 
 zip -r quantization.zip . -x *.git* -x *.idea* -x *.DS_Store* -x *__pycache__/* -x __pycache__/
-scp quantization.zip ruben.steendam@$IP:~/
-ssh ruben.steendam@$IP "mkdir quantization; mv quantization.zip quantization/ && cd quantization && unzip -o quantization.zip && rm quantization.zip"
+scp quantization.zip $USER@$IP:~/
+ssh $USER@$IP "mkdir quantization; mv quantization.zip quantization/ && cd quantization && unzip -o quantization.zip && rm quantization.zip"
 rm quantization.zip
-ssh ruben.steendam@$IP "sh quantization/script/init.sh"
+ssh $USER@$IP "sh quantization/script/init.sh"
