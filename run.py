@@ -247,6 +247,7 @@ def train(model, train_generator, validation_generator, epochs, filepath=None):
 
     return model
 
+
 def mcnemar_test(float32, mixed, test_generator):
     print("running McNemar's Test")
     yesyes = 0
@@ -351,6 +352,7 @@ def test_mixed(mixed_model, float_model, validation_generator):
 
 def test_inference_speed(model, test_generator):
     model.evaluate(test_generator, verbose=1, steps=len(test_generator), workers=4)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
