@@ -130,3 +130,5 @@ dmypy.json
 
 # Safety
 utils/kaggle.json
+mcnemar.py
+results
